@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const { listContains, inRange, exists, calculatePageSize, calculateOffset } = require('../util')
-const { uri, database } = require('../db-config')
 const MongoClient = require('mongodb').MongoClient
 
 const COLLECTION_NAME = 'route'
@@ -22,14 +21,14 @@ const filterMap = {
 
 const sortableFields = ['name', 'types', 'rating', 'length', 'pitches', 'height', 'grades']
 
-const client = new MongoClient(uri, { useUnifiedTopology: true })
+const client = new MongoClient(process.env.MONGO_URI, { useUnifiedTopology: true })
 client.connect((err, client) => {
     if (err) {
         console.error(err)
         return
     }
 
-    let collection = client.db(database).collection(COLLECTION_NAME)
+    let collection = client.db(process.env.MONGO_DB_NAME).collection(COLLECTION_NAME)
 
     router.get('/search', ({ query }, res) => {
         res.set('Access-Control-Allow-Origin', 'localhost:3000')
