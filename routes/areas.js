@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const { iterInRange, inRange, exists, calculateOffset, calculatePageSize } = require('../util')
-const { uri, database } = require('../db-config')
 const MongoClient = require('mongodb').MongoClient
 
 const COLLECTION_NAME = 'area'
@@ -20,14 +19,14 @@ const filterMap = {
 
 const sortableFields = ['name', 'elevation']
 
-const client = new MongoClient(uri, { useUnifiedTopology: true })
+const client = new MongoClient(process.env.MONGO_URI, { useUnifiedTopology: true })
 client.connect((err, client) => {
     if (err) {
         console.error(err)
         return
     }
 
-    let collection = client.db(database).collection(COLLECTION_NAME)
+    let collection = client.db(process.env.MONGO_DB_NAME).collection(COLLECTION_NAME)
 
     router.get('/search', ({ query }, res) => {
         const pageSize = calculatePageSize(query.pageSize, MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE)
