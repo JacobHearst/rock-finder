@@ -29,5 +29,5 @@ app.use(function(err, req, res) {
     res.status(err.status || 500)
 })
 
-const port = 4000
+const port = process.env.port
 app.listen(port, () => console.log(`Listening at localhost: ${port}`))
