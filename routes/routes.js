@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { listContains, inRange, exists, calculatePageSize, calculateOffset } = require('../util')
-const MongoClient = require('mongodb').MongoClient
+const database = require('../database')
 
 const COLLECTION_NAME = 'route'
 
@@ -21,8 +21,7 @@ const filterMap = {
 
 const sortableFields = ['name', 'types', 'rating', 'length', 'pitches', 'height', 'grades']
 
-const client = new MongoClient(process.env.MONGO_URI, { useUnifiedTopology: true })
-client.connect((err, client) => {
+database.connect((err, client) => {
     if (err) {
         console.error(err)
         return

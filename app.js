@@ -33,4 +33,4 @@ let port = process.env.port
 if (port == null || port == '') {
     port = 8000
 }
-app.listen(port, () => console.log(`Listening at localhost: ${port}`))
+app.listen(port, () => console.log(`Listening on port: ${port}`))
