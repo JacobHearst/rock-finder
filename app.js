@@ -29,5 +29,8 @@ app.use(function(err, req, res) {
     res.status(err.status || 500)
 })
 
-const port = process.env.port
+let port = process.env.port
+if (port == null || port == '') {
+    port = 8000
+}
 app.listen(port, () => console.log(`Listening at localhost: ${port}`))
