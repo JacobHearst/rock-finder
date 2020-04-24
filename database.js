@@ -6,7 +6,7 @@ var conn
  */
 function connect(callback) {
     if (conn === undefined) {
-        MongoClient.connect(process.env.MONGO_URI, function (err, db) {
+        MongoClient.connect(process.env.MONGO_URI, { useUnifiedTopology: true }, function (err, db) {
             if (err) { return callback(err) }
             conn = db
             callback(null, db)
