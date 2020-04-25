@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const { iterInRange, inRange, exists, calculateOffset, calculatePageSize } = require('../util')
-const database = require('../database')
 
 const COLLECTION_NAME = 'area'
 
@@ -19,58 +18,49 @@ const filterMap = {
 
 const sortableFields = ['name', 'elevation']
 
-database.connect((err, client) => {
-    if (err) {
-        console.error(err)
-        return
+router.get('/search', ({ query, app: { locals: { db }} }, res) => {
+    const pageSize = calculatePageSize(query.pageSize, MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE)
+    const offset = calculateOffset(pageSize, Number(query.pageNumber))
+    
+    const filter = {}
+    for (let param in filterMap) {
+        if (query[param]) {
+            const values = query[param].split(',')
+            Object.assign(filter, filterMap[param](param, values))
+        }
     }
 
-    let collection = client.db(process.env.MONGO_DB_NAME).collection(COLLECTION_NAME)
-
-    router.get('/search', ({ query }, res) => {
-        const pageSize = calculatePageSize(query.pageSize, MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE)
-        const offset = calculateOffset(pageSize, Number(query.pageNumber))
-        
-        const filter = {}
-        for (let param in filterMap) {
-            if (query[param]) {
-                const values = query[param].split(',')
-                Object.assign(filter, filterMap[param](param, values))
-            }
+    const sort = {}
+    for (let i in sortableFields) {
+        const param = sortableFields[i]
+        const sortParam = `${param}Sort`
+        if (query[sortParam]) {
+            sort[param] = Number(query[sortParam])
+            Object.assign(filter, exists(param))
         }
+    }
 
-        const sort = {}
-        for (let i in sortableFields) {
-            const param = sortableFields[i]
-            const sortParam = `${param}Sort`
-            if (query[sortParam]) {
-                sort[param] = Number(query[sortParam])
-                Object.assign(filter, exists(param))
-            }
+    if (Object.keys(sort).length < 1) {
+        sort[DEFAULT_SORT_PARAM] = 1
+    }
+    
+    const projection = { _id: 1, link: 1, parent_id: 1, name: 1, elevation: 1 }
+
+    db.db(process.env.MONGO_DB_NAME).collection(COLLECTION_NAME).find(filter, { sort, projection }).skip(offset).limit(pageSize).toArray((err, docs) => {
+        if (err) {
+            res.status(500).send(err)
+        } else if (docs.length === 0) {
+            res.status(404)
+        } else {
+            res.send(docs)
         }
-
-        if (Object.keys(sort).length < 1) {
-            sort[DEFAULT_SORT_PARAM] = 1
-        }
-        
-        const projection = { _id: 1, link: 1, parent_id: 1, name: 1, elevation: 1 }
-
-        collection.find(filter, { sort, projection }).skip(offset).limit(pageSize).toArray((err, docs) => {
-            if (err) {
-                res.status(500).send(err)
-            } else if (docs.length === 0) {
-                res.status(404)
-            } else {
-                res.send(docs)
-            }
-        })
     })
+})
 
-    router.get('/:id', (req, res) => {
-        collection.findOne({ _id: Number(req.params.id) })
-            .then((route) => route ? res.send(route) : res.sendStatus(404))
-            .catch((reason) => console.error(`ERROR: ${reason}`))
-    })
+router.get('/:id', ({ app: { locals: { db } }, params: { id } }, res) => {
+    db.db(process.env.MONGO_DB_NAME).collection(COLLECTION_NAME).findOne({ _id: Number(id) })
+        .then((route) => route ? res.send(route) : res.sendStatus(404))
+        .catch((reason) => console.error(`ERROR: ${reason}`))
 })
 
 module.exports = router
