@@ -37,6 +37,7 @@ app.use(function(err, req, res) {
 })
 
 MongoClient.connect(process.env.MONGO_URI, { useUnifiedTopology: true }, (err, db) => {
+    console.log('Connected')
     if (err) {
         console.error(`Failed to connect to the database. ${err}`)
     }
