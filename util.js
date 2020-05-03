@@ -31,7 +31,10 @@ const iterInRange = (field_name, values) => ({ [field_name]: { $elemMatch: { $gt
 /** @param {Array} values Parameter value */
 const listContains = (field_name, values) => ({ [field_name]: { $elemMatch: { $in: values } } })
 
+/** @param {string} field_name Name of the field to check */
 const exists = (field_name) => ({ [field_name]: { $exists: true } })
+
+const like = (field_name, regex) => ({ [field_name]: `/${regex}/` })
 
 module.exports = {
     inRange,
@@ -40,5 +43,6 @@ module.exports = {
     exists,
     min,
     calculatePageSize,
-    calculateOffset
+    calculateOffset,
+    like
 }

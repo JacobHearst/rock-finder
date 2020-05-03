@@ -5,6 +5,7 @@ var MongoClient = require('mongodb').MongoClient
 
 var areaRouter = require('./routes/areas')
 var routeRouter = require('./routes/routes')
+var gradeRouter = require('./routes/grades')
 
 var app = express()
 
@@ -12,7 +13,7 @@ app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
-app.use(function(req, res, next) {
+app.use(function(_req, res, next) {
     res.header('Access-Control-Allow-Origin', '*') // update to match the domain you will make the request from
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
     next()
@@ -20,6 +21,7 @@ app.use(function(req, res, next) {
 
 app.use('/areas', areaRouter)
 app.use('/routes', routeRouter)
+app.use('/grades', gradeRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -37,7 +39,7 @@ app.use(function(err, req, res) {
 })
 
 MongoClient.connect(process.env.MONGO_URI, { useUnifiedTopology: true }, (err, db) => {
-    console.log('Connected')
+    console.log('Connected to Mongo')
     if (err) {
         console.error(`Failed to connect to the database. ${err}`)
     }
