@@ -23,7 +23,10 @@ const calculatePageSize = (requested, max, defaultSize) => requested ? min(Numbe
 const calculateOffset = (pageSize, pageNumber) => pageNumber > 0 ? ((pageNumber - 1) * pageSize) : 0
 
 /** @param {Array} values range to check against */
-const inRange = (field_name, values) => ({ [field_name]: { $gte: Number(values[0]), $lte: Number(values[1]) } })
+const inRange = (field_name, values) => ({ [field_name]: { $gte: values[0], $lte: values[1] } })
+
+/** @param {Array} values range to check against */
+const numInRange = (field_name, values) => inRange(field_name, [Number(values[0]), Number(values[1])])
 
 /** @param {Array} values range to check against */
 const iterInRange = (field_name, values) => ({ [field_name]: { $elemMatch: { $gte: Number(values[0]), $lte: Number(values[1]) } } })
@@ -38,6 +41,7 @@ const like = (field_name, regex) => ({ [field_name]: `/${regex}/` })
 
 module.exports = {
     inRange,
+    numInRange,
     iterInRange,
     listContains,
     exists,

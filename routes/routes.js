@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const { listContains, inRange, exists, calculatePageSize, calculateOffset, like } = require('../util')
+const { listContains, inRange, numInRange, exists, calculatePageSize, calculateOffset, like } = require('../util')
+const _ = require('lodash')
 
 const COLLECTION_NAME = 'route'
 
@@ -11,15 +12,14 @@ const MAX_PAGE_SIZE = 100
 const filterMap = {
     name: like,
     types: listContains,
-    rating: inRange,
+    rating: numInRange,
     length: inRange,
-    pitches: inRange,
-    height: inRange,
-    elevation: inRange,
+    pitches: numInRange,
+    height: numInRange,
     grades: (_param, values) => inRange(`grades.${values[0]}.sort_index`, values.slice(1))
 }
 
-const sortableFields = ['name', 'rating', 'length', 'pitches', 'height', 'elevation', 'grades']
+const sortableFields = ['name', 'rating', 'length', 'pitches', 'height', 'grades']
 
 router.get('/search', ({ app: { locals: { db } }, query }, res) => {
     const pageSize = calculatePageSize(query.pageSize, MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE)
@@ -47,6 +47,7 @@ router.get('/search', ({ app: { locals: { db } }, query }, res) => {
         sort[DEFAULT_SORT_PARAM] = 1
     }
 
+    console.log(filter)
     db.db(process.env.MONGO_DB_NAME)
         .collection(COLLECTION_NAME)
         .find(filter, { sort })
@@ -63,8 +64,62 @@ router.get('/search', ({ app: { locals: { db } }, query }, res) => {
         })
 })
 
+router.get('/filters', ({app: { locals: { db } } }, res) => {
+    const agg = [
+        {
+            '$group': {
+                '_id': null,
+                'length': {
+                    '$addToSet': '$length'
+                },
+                'pitches': {
+                    '$addToSet': '$pitches'
+                },
+                'height': {
+                    '$addToSet': '$height'
+                },
+                'rating': {
+                    '$addToSet': '$rating'
+                }
+            }
+        }, {
+            '$project': {
+                '_id': false
+            }
+        }
+    ]
+
+    db.db(process.env.MONGO_DB_NAME)
+        .collection(COLLECTION_NAME)
+        .aggregate(agg)
+        .toArray((err, docs) => {
+            if (err) {
+                res.status(500).send(err)
+            } else if (docs.length === 0) {
+                res.status(404)
+            } else {
+                const doc = docs[0]
+
+                const response = {}
+                for (let filter in doc) {
+                    // Define a sort function for numbers
+                    const sortFunc = !isNaN(doc[filter][0])
+                        ? (a, b) => a - b
+                        : undefined
+
+                    const sorted = doc[filter].sort(sortFunc)
+                    response[filter] = _.filter(sorted, (value) => !_.isEmpty(value) || !isNaN(value))
+                }
+
+                res.send(response)
+            }
+        })
+})
+
 router.get('/:id', ({ params, app: { locals: { db } } }, res) => {
-    db.db(process.env.MONGO_DB_NAME).collection(COLLECTION_NAME).findOne({ _id: Number(params.id) })
+    db.db(process.env.MONGO_DB_NAME)
+        .collection(COLLECTION_NAME)
+        .findOne({ _id: Number(params.id) })
         .then((route) => res.send(route))
         .catch((reason) => console.error(`ERROR: ${reason}`))
 })

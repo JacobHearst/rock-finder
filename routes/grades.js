@@ -42,13 +42,6 @@ router.get('/:gradeSystem', ({ params: { gradeSystem }, app: { locals: { db } } 
             '$sort': {
                 'sort_index': 1
             }
-        }, {
-            // TODO: Make this step configurable
-            '$match': {
-                'grade': {
-                    '$regex': '(5\\.(?:1\\d(?:[\\w\\/])+)|(?:5.\\d[+-]?$)|3rd|4th|Easy 5th)' // Eliminate the 5.xx-, 5.xx+, 5.xx grades
-                }
-            }
         }
     ]
 
@@ -114,6 +107,8 @@ router.get('/', ({ app: { locals: { db } } }, res) => {
                     }
                 }
             }
+        }, {
+            '$project': { '_id': false }
         }
     ]
 
@@ -126,7 +121,6 @@ router.get('/', ({ app: { locals: { db } } }, res) => {
             } else if (docs.length === 0) {
                 res.status(404)
             } else {
-                delete docs[0]._id
                 const response = {}
                 for (let gradeSystem in docs[0]) {
                     const sorted = _.orderBy(docs[0][gradeSystem], ['sort_index'])
