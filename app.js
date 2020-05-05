@@ -39,15 +39,16 @@ app.use(function(err, req, res) {
 })
 
 MongoClient.connect(process.env.MONGO_URI, { useUnifiedTopology: true }, (err, db) => {
-    console.log('Connected to Mongo')
     if (err) {
         console.error(`Failed to connect to the database. ${err}`)
-    }
-    app.locals.db = db
+    } else {
+        console.log('Connected to Mongo')
+        app.locals.db = db
 
-    let port = process.env.port
-    if (port == null || port == '') {
-        port = 8000
+        let port = process.env.port
+        if (port == null || port == '') {
+            port = 8000
+        }
+        app.listen(port, () => console.log(`Listening on port: ${port}`))
     }
-    app.listen(port, () => console.log(`Listening on port: ${port}`))
 })
