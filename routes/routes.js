@@ -6,8 +6,9 @@ const _ = require('lodash')
 const COLLECTION_NAME = 'route'
 
 const DEFAULT_SORT_PARAM = 'rating'
-const DEFAULT_PAGE_SIZE = 50
-const MAX_PAGE_SIZE = 100
+const DEFAULT_SORT_ORDER = -1
+const DEFAULT_PAGE_SIZE = 100
+const MAX_PAGE_SIZE = 500
 
 const filterMap = {
     name: like,
@@ -16,10 +17,10 @@ const filterMap = {
     length: inRange,
     pitches: numInRange,
     height: numInRange,
-    grades: (_param, values) => inRange(`grades.${values[0]}.sort_index`, values.slice(1))
+    grade: (_param, values) => numInRange(`grades.${values[0]}.sort_index`, values.slice(1))
 }
 
-const sortableFields = ['name', 'rating', 'length', 'pitches', 'height', 'grades']
+const sortableFields = ['name', 'rating', 'length', 'pitches', 'height', 'grade', 'types']
 
 router.get('/search', ({ app: { locals: { db } }, query }, res) => {
     const pageSize = calculatePageSize(query.pageSize, MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE)
@@ -43,8 +44,8 @@ router.get('/search', ({ app: { locals: { db } }, query }, res) => {
         }
     }
 
-    if (Object.keys(sort).length < 1) {
-        sort[DEFAULT_SORT_PARAM] = 1
+    if (_.isEmpty(sort)) {
+        sort[DEFAULT_SORT_PARAM] = DEFAULT_SORT_ORDER
     }
 
     console.log(filter)
