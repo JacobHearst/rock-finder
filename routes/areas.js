@@ -46,19 +46,23 @@ router.get('/search', ({ query, app: { locals: { db }} }, res) => {
     
     const projection = { _id: 1, link: 1, parent_id: 1, name: 1, elevation: 1 }
 
-    db.db(process.env.MONGO_DB_NAME).collection(COLLECTION_NAME).find(filter, { sort, projection }).skip(offset).limit(pageSize).toArray((err, docs) => {
-        if (err) {
-            res.status(500).send(err)
-        } else if (docs.length === 0) {
-            res.status(404)
-        } else {
-            res.send(docs)
-        }
-    })
+    db.collection(COLLECTION_NAME)
+        .find(filter, { sort, projection })
+        .skip(offset).limit(pageSize)
+        .toArray((err, docs) => {
+            if (err) {
+                res.status(500).send(err)
+            } else if (docs.length === 0) {
+                res.status(404)
+            } else {
+                res.send(docs)
+            }
+        })
 })
 
 router.get('/:id', ({ app: { locals: { db } }, params: { id } }, res) => {
-    db.db(process.env.MONGO_DB_NAME).collection(COLLECTION_NAME).findOne({ _id: Number(id) })
+    db.collection(COLLECTION_NAME)
+        .findOne({ _id: Number(id) })
         .then((route) => route ? res.send(route) : res.sendStatus(404))
         .catch((reason) => console.error(`ERROR: ${reason}`))
 })

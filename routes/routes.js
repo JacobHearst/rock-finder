@@ -48,9 +48,7 @@ router.get('/search', ({ app: { locals: { db } }, query }, res) => {
         sort[DEFAULT_SORT_PARAM] = DEFAULT_SORT_ORDER
     }
 
-    console.log(filter)
-    db.db(process.env.MONGO_DB_NAME)
-        .collection(COLLECTION_NAME)
+    db.collection(COLLECTION_NAME)
         .find(filter, { sort })
         .skip(offset)
         .limit(pageSize)
@@ -90,8 +88,7 @@ router.get('/filters', ({app: { locals: { db } } }, res) => {
         }
     ]
 
-    db.db(process.env.MONGO_DB_NAME)
-        .collection(COLLECTION_NAME)
+    db.collection(COLLECTION_NAME)
         .aggregate(agg)
         .toArray((err, docs) => {
             if (err) {
@@ -118,8 +115,7 @@ router.get('/filters', ({app: { locals: { db } } }, res) => {
 })
 
 router.get('/:id', ({ params, app: { locals: { db } } }, res) => {
-    db.db(process.env.MONGO_DB_NAME)
-        .collection(COLLECTION_NAME)
+    db.collection(COLLECTION_NAME)
         .findOne({ _id: Number(params.id) })
         .then((route) => res.send(route))
         .catch((reason) => console.error(`ERROR: ${reason}`))

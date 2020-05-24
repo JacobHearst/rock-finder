@@ -45,8 +45,7 @@ router.get('/:gradeSystem', ({ params: { gradeSystem }, app: { locals: { db } } 
         }
     ]
 
-    db.db(process.env.MONGO_DB_NAME)
-        .collection(COLLECTION_NAME)
+    db.collection(COLLECTION_NAME)
         .aggregate(aggregation)
         .toArray((err, docs) => {
             if (err) {
@@ -112,8 +111,7 @@ router.get('/', ({ app: { locals: { db } } }, res) => {
         }
     ]
 
-    db.db(process.env.MONGO_DB_NAME)
-        .collection(COLLECTION_NAME)
+    db.collection(COLLECTION_NAME)
         .aggregate(agg)
         .toArray((err, docs) => {
             if (err) {

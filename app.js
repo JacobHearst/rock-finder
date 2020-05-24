@@ -43,7 +43,7 @@ MongoClient.connect(process.env.MONGO_URI, { useUnifiedTopology: true }, (err, d
         console.error(`Failed to connect to the database. ${err}`)
     } else {
         console.log('Connected to Mongo')
-        app.locals.db = db
+        app.locals.db = db.db(process.env.MONGO_DB_NAME)
 
         let port = process.env.port
         if (port == null || port == '') {
