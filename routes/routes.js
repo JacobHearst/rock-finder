@@ -24,7 +24,7 @@ const sortableFields = ['name', 'rating', 'length', 'pitches', 'height', 'grade'
 
 router.get('/search', ({ app: { locals: { db } }, query }, res) => {
     const pageSize = calculatePageSize(query.pageSize, MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE)
-    const offset = calculateOffset(pageSize, Number(query.pageNumber))
+    const offset = calculateOffset(pageSize, Number(query.page))
 
     const filter = {}
     for (let param in filterMap) {
@@ -48,19 +48,25 @@ router.get('/search', ({ app: { locals: { db } }, query }, res) => {
         sort[DEFAULT_SORT_PARAM] = DEFAULT_SORT_ORDER
     }
 
-    db.collection(COLLECTION_NAME)
+    const docsCursor = db.collection(COLLECTION_NAME)
         .find(filter, { sort })
-        .skip(offset)
-        .limit(pageSize)
-        .toArray((err, docs) => {
-            if (err) {
-                res.status(500).send(err)
-            } else if (docs.length === 0) {
-                res.status(404)
-            } else {
-                res.send(docs)
-            }
-        })
+
+    docsCursor.count().then((totalSize) => {
+        docsCursor.skip(offset)
+            .limit(pageSize)
+            .toArray((err, routes) => {
+                if (err) {
+                    res.status(500).send(err)
+                } else if (routes.length === 0) {
+                    res.status(404)
+                } else {
+                    res.send({
+                        maxPage: Math.ceil(totalSize / pageSize),
+                        routes
+                    })
+                }
+            })
+    })
 })
 
 router.get('/filters', ({app: { locals: { db } } }, res) => {
