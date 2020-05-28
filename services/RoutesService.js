@@ -60,29 +60,29 @@ async function searchRoutes(db, query) {
 async function fetchFilters(db) {
     const agg = [
         {
-            '$group': {
-                '_id': null,
-                'length': {
-                    '$addToSet': '$length'
-                },
-                'pitches': {
-                    '$addToSet': '$pitches'
-                },
-                'height': {
-                    '$addToSet': '$height'
-                },
-                'rating': {
-                    '$addToSet': '$rating'
-                }
+            $group: {
+                _id: null,
+                length: { $addToSet: '$length' },
+                pitches_min: { $min: '$pitches' },
+                pitches_max: { $max: '$pitches' },
+                height_min: { $min: '$height' },
+                height_max: { $max: '$height' },
             }
         }, {
-            '$project': {
-                '_id': false
+            $project: {
+                _id: false
             }
         }
     ]
 
-    return db.collection(COLLECTION_NAME).aggregate(agg).toArray()
+    const { length, pitches_min, pitches_max, height_min, height_max } = 
+        await db.collection(COLLECTION_NAME).aggregate(agg).toArray()
+
+    return {
+        length: { labels: length },
+        pitches: { min: pitches_min, max: pitches_max },
+        height: { min: height_min, max: height_max }
+    }
 }
 
 module.exports = {
