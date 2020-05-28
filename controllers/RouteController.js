@@ -1,4 +1,4 @@
-const { searchRoutes, fetchFilters, fetchGrades } = require('../services/RoutesService')
+const { searchRoutes, fetchFilters, fetchGrades } = require('../services/RouteService')
 
 async function getRoutes(req, res, next) {
     const { app: { locals: { db } }, query } = req

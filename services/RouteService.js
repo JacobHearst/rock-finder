@@ -88,53 +88,53 @@ async function fetchFilters(db) {
 async function fetchGrades(db) {
     const agg = [
         {
-            '$group': {
-                '_id': 'grades',
-                'yds': {
-                    '$addToSet': {
-                        'grade': '$grades.yds.grade',
-                        'sort_index': '$grades.yds.sort_index'
+            $group: {
+                _id: 'grades',
+                yds: {
+                    $addToSet: {
+                        grade: '$grades.yds.grade',
+                        sort_index: '$grades.yds.sort_index'
                     }
                 },
-                'hueco': {
-                    '$addToSet': {
-                        'grade': '$grades.hueco.grade',
-                        'sort_index': '$grades.hueco.sort_index'
+                hueco: {
+                    $addToSet: {
+                        grade: '$grades.hueco.grade',
+                        sort_index: '$grades.hueco.sort_index'
                     }
                 },
-                'ice': {
-                    '$addToSet': {
-                        'grade': '$grades.ice.grade',
-                        'sort_index': '$grades.ice.sort_index'
+                ice: {
+                    $addToSet: {
+                        grade: '$grades.ice.grade',
+                        sort_index: '$grades.ice.sort_index'
                     }
                 },
-                'mixed': {
-                    '$addToSet': {
-                        'grade': '$grades.mixed.grade',
-                        'sort_index': '$grades.mixed.sort_index'
+                mixed: {
+                    $addToSet: {
+                        grade: '$grades.mixed.grade',
+                        sort_index: '$grades.mixed.sort_index'
                     }
                 },
-                'aid': {
-                    '$addToSet': {
-                        'grade': '$grades.aid.grade',
-                        'sort_index': '$grades.aid.sort_index'
+                aid: {
+                    $addToSet: {
+                        grade: '$grades.aid.grade',
+                        sort_index: '$grades.aid.sort_index'
                     }
                 },
-                'danger': {
-                    '$addToSet': {
-                        'grade': '$grades.danger.grade',
-                        'sort_index': '$grades.danger.sort_index'
+                danger: {
+                    $addToSet: {
+                        grade: '$grades.danger.grade',
+                        sort_index: '$grades.danger.sort_index'
                     }
                 },
-                'snow': {
-                    '$addToSet': {
-                        'grade': '$grades.snow.grade',
-                        'sort_index': '$grades.snow.sort_index'
+                snow: {
+                    $addToSet: {
+                        grade: '$grades.snow.grade',
+                        sort_index: '$grades.snow.sort_index'
                     }
                 }
             }
         }, {
-            '$project': { '_id': false }
+            $project: { _id: false }
         }
     ]
 
