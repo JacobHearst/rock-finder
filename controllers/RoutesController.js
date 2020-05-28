@@ -1,4 +1,4 @@
-const { searchRoutes, fetchFilters } = require('../services/RoutesService')
+const { searchRoutes, fetchFilters, fetchGrades } = require('../services/RoutesService')
 
 async function getRoutes(req, res, next) {
     const { app: { locals: { db } }, query } = req
@@ -29,7 +29,21 @@ async function getFilters(req, res, next) {
     }
 }
 
+async function getGrades(req, res, next) {
+    const { app: { locals: { db } } } = req
+
+    try {
+        const grades = await fetchGrades(db)
+
+        res.send(grades)
+    } catch (e) {
+        console.log(e)
+        res.sendStatus(500) && next(e)
+    }
+}
+
 module.exports = {
     getRoutes,
-    getFilters
+    getFilters,
+    getGrades
 }
