@@ -52,7 +52,7 @@ async function searchRoutes(db, query) {
     const results = await docsCursor.skip(offset).limit(pageSize).toArray()
 
     return {
-        maxPage: totalSize / pageSize,
+        maxPage: Math.ceil(totalSize / pageSize),
         routes: results
     }
 }
