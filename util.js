@@ -58,22 +58,25 @@ const conditionInRange = (fieldName, values) => (
  * Create a MongoDB nearSphere query
  *
  * @param {string} fieldName The name of the GeoPoint field
- * @param {float[]} coordinates The coordinates of the point to query
- * @param {float} minDistance [OPTIONAL] The minimum distance from the point
- * @param {float} maxDistance [OPTIONAL] The maximum distance from the point
+ * @param {string[]} values The coordinates of the point to query
  */
-const nearSphere = (fieldName, coordinates, minDistance = undefined, maxDistance = undefined) => (
-    {
-        [fieldName]: {
-            $nearSphere: {
+const nearSphere = (fieldName, values) => {
+    const numVals = values.map(x => Number(x))
+    const nearSphere = {
+        $nearSphere: {
+            $geometry: {
                 type: "Point",
-                coordinates
-            },
-            $minDistance: minDistance,
-            $maxDistance: maxDistance
+                coordinates: numVals.slice(0, 2)
+            }
         }
     }
-)
+
+    // Add min and max distance if passed
+    if (numVals.length > 2) nearSphere.$nearSphere.$minDistance = numVals[2]
+    else if (numVals.length > 3) nearSphere.$nearSphere.$maxDistance = numVals[3]
+
+    return { [fieldName]: nearSphere}
+}
 
 module.exports = {
     calculateOffset,

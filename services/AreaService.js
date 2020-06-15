@@ -5,7 +5,7 @@ const filterMap = {
     precip_avgs: conditionInRange,
     name: like,
     elevation: numInRange,
-    position: nearSphere
+    coords: nearSphere
 }
 
 const COLLECTION_NAME = 'area'
@@ -30,7 +30,7 @@ async function searchAreas(db, query) {
     const results = await docsCursor.skip(offset).limit(pageSize).toArray()
 
     return {
-        maxPage: Math.ciel(totalSize / pageSize),
+        maxPage: Math.ceil(totalSize / pageSize),
         areas: results
     }
 }
