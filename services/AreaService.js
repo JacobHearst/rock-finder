@@ -1,40 +1,41 @@
-const { conditionInRange, like, numInRange, calculateOffset, calculatePageSize, nearSphere } = require('../util')
-
-const filterMap = {
-    temp_avgs: conditionInRange,
-    precip_avgs: conditionInRange,
-    name: like,
-    elevation: numInRange,
-    position: nearSphere
-}
+const { filterFromMap, exists } = require('../MongoHelpers')
+const { paginateCursor, areaFilterMap } = require('./shared')
 
 const COLLECTION_NAME = 'area'
-const DEFAULT_PAGE_SIZE = 100
-const MAX_PAGE_SIZE = 500
 
 async function searchAreas(db, query) {
-    const pageSize = calculatePageSize(query.pageSize, MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE)
-    const offset = calculateOffset(pageSize, Number(query.page))
-
-    const filter = {}
-    for (let param in filterMap) {
-        if (query[param]) {
-            const values = query[param].split(',')
-            Object.assign(filter, filterMap[param](param, values))
-        }
-    }
+    const filter = filterFromMap(areaFilterMap, query)
 
     const docsCursor = db.collection(COLLECTION_NAME).find(filter)
 
-    const totalSize = await docsCursor.count()
-    const results = await docsCursor.skip(offset).limit(pageSize).toArray()
+    return paginateCursor(docsCursor, Number(query.page), Number(query.pageSize))
+}
 
-    return {
-        maxPage: Math.ciel(totalSize / pageSize),
-        areas: results
-    }
+async function aggregateAreaIds(db, matching) {
+    // Since we'll be looking for the lowest level areas,
+    // we can automatically exclude root nodes
+    Object.assign(matching, exists('ancestors'))
+    const agg = [
+        { $match: matching },
+        {
+            $unwind: { path: '$ancestors' }
+        },
+        {
+            $group: {
+                _id: null,
+                ids: { $addToSet: '$_id' },
+                parent_ids: { $addToSet: '$ancestors' }
+            }
+        },
+    ]
+
+    const results = await db.collection(COLLECTION_NAME).aggregate(agg).toArray()
+    
+    // Create an array of ids not listed as parent_ids
+    return results[0].ids.filter((id) => !results[0].parent_ids.includes(id))
 }
 
 module.exports = {
-    searchAreas
+    searchAreas,
+    aggregateAreaIds
 }
