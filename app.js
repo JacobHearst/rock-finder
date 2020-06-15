@@ -3,8 +3,7 @@ var express = require('express')
 var logger = require('morgan')
 var MongoClient = require('mongodb').MongoClient
 
-var areaRouter = require('./routes/areas')
-var routeRouter = require('./routes/routes')
+var router = require('./routes')
 
 var app = express()
 
@@ -18,8 +17,7 @@ app.use(function(_req, res, next) {
     next()
 })
 
-app.use('/areas', areaRouter)
-app.use('/routes', routeRouter)
+app.use('/', router)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
