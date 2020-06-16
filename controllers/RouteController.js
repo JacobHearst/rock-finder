@@ -5,7 +5,7 @@ async function getRoutes(req, res, next) {
     
     try {
         const results = await searchRoutes(db, query)
-        if (results.routes.length === 0) {
+        if (results.documents.length === 0) {
             res.sendStatus(404)
         } else {
             res.send(results)
