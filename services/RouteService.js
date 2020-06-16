@@ -19,7 +19,6 @@ async function searchRoutes(db, query) {
         Object.assign(filter, valueIn('ancestors', areaIds))
     }
 
-    console.log(filter)
     const docsCursor = db.collection(COLLECTION_NAME).find(filter, { sort })
 
     return paginateCursor(docsCursor, Number(query.page), Number(query.pageSize))
