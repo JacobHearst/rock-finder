@@ -1,4 +1,4 @@
-const { filterFromMap, buildSort, valueIn } = require('../MongoHelpers')
+const { filterFromMap, buildSort, valueIn, like } = require('../MongoHelpers')
 const { paginateCursor, routeFilterMap, areaFilterMap } = require('./shared')
 const { aggregateAreaIds } = require('./AreaService')
 const _ = require('lodash')
@@ -22,6 +22,14 @@ async function searchRoutes(db, query) {
     const docsCursor = db.collection(COLLECTION_NAME).find(filter, { sort })
 
     return paginateCursor(docsCursor, Number(query.page), Number(query.pageSize))
+}
+
+async function autocompleteRouteNames(db, query) {
+    const filter = routeFilterMap.route_name('name', query.name)
+    console.log(filter)
+    const documents = await db.collection(COLLECTION_NAME).find(filter, { sort: { name: 1}}).limit(10).toArray()
+
+    return { documents }
 }
 
 async function fetchFilters(db) {
@@ -117,7 +125,8 @@ async function fetchGrades(db) {
 }
 
 module.exports = {
-    searchRoutes,
+    autocompleteRouteNames,
     fetchFilters,
-    fetchGrades
+    fetchGrades,
+    searchRoutes,
 }

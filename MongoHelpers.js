@@ -12,9 +12,9 @@ const listContains = (fieldName, values) => ({ [fieldName]: { $elemMatch: { $in:
 /** @param {string} fieldName Name of the field to check */
 const exists = (fieldName) => ({ [fieldName]: { $exists: true } })
 
-const like = (fieldName, regex) => ({ [fieldName]: { $regex: `.*${regex}.*`, $options: 'i' }})
+const like = (fieldName, text) => ({ [fieldName]: { $regex: `^${text}`, $options: 'i' }})
 
-const nameLike = (_fieldName, regex) => like('name', regex)
+const nameLike = (_fieldName, text) => like('name', text)
 
 const valueIn = (fieldName, values) => ({[fieldName]: { $in: values }})
 
