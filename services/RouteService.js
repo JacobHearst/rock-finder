@@ -26,7 +26,8 @@ async function searchRoutes(db, query) {
 
 async function autocompleteRouteNames(db, query) {
     const filter = routeFilterMap.route_name('name', query.name)
-    const documents = db.collection(COLLECTION_NAME).find(filter, { sort: { name: 1}}).limit(10).toArray()
+    console.log(filter)
+    const documents = await db.collection(COLLECTION_NAME).find(filter, { sort: { name: 1}}).limit(10).toArray()
 
     return { documents }
 }
