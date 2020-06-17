@@ -1,10 +1,26 @@
-const { searchRoutes, fetchFilters, fetchGrades } = require('../services/RouteService')
+const { searchRoutes, autocompleteRouteNames, fetchFilters, fetchGrades } = require('../services/RouteService')
 
 async function getRoutes(req, res, next) {
     const { app: { locals: { db } }, query } = req
     
     try {
         const results = await searchRoutes(db, query)
+        if (results.documents.length === 0) {
+            res.sendStatus(404)
+        } else {
+            res.send(results)
+        }
+    } catch (e) {
+        console.log(e)
+        res.sendStatus(500) && next(e)
+    }
+}
+
+async function getNameAutocomplete(req, res, next) {
+    const { app: { locals: { db } }, params } = req
+
+    try {
+        const results = await autocompleteRouteNames(db, params)
         if (results.documents.length === 0) {
             res.sendStatus(404)
         } else {
@@ -43,7 +59,8 @@ async function getGrades(req, res, next) {
 }
 
 module.exports = {
-    getRoutes,
     getFilters,
-    getGrades
+    getGrades,
+    getNameAutocomplete,
+    getRoutes,
 }
